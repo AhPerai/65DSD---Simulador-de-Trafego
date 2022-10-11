@@ -6,4 +6,4 @@
 
 + <h4>Gabriel Antonio Bertoldi Perini </h4>
 
-+ <h5>Angelina Machado de Siqueira </h5>
++ <h4>Angelina Machado de Siqueira </h4>
