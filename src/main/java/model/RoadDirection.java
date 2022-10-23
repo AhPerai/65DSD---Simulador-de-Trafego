@@ -1,42 +1,50 @@
 package model;
 
-public class RoadDirection {
+/*
+*Classe para mapear os tipos de blocos/estradas que compõem a malha 
+ */
+public enum RoadDirection {
 
-    // apenas no sentido horizontal e vertical;
-    private RoadDirection roadUp;//1
-    private RoadDirection roadRight;//2
-    private RoadDirection roadDown;//3
-    private RoadDirection roadLeft;//4
+    BASE(0, "/images/TileBase.png"),
+    UP(1, "images/TileUp.png"),
+    RIGHT(2, "images/TileRight.png"),
+    DOWN(3, "images/TileDown.png"),
+    LEFT(4, "images/TileLeft.png"),
+    FIVE(5, "images/TileCross.png"),
+    SIX(6, "images/TileCross.png"),
+    SEVEN(7, "images/TileCross.png"),
+    EIGHT(8, "images/TileCross.png"),
+    NINE(9, "images/TileCross.png"),
+    TEN(10, "images/TileCross.png"),
+    ELEVEN(11, "images/TileCross.png"),
+    TWELVE(12, "images/TileCross.png");
 
+    private int number;
+    private String path;
 
+    private RoadDirection(int number, String path) {
+        this.number = number;
+        this.path = path;
+    }
 
+    public static String getDirectionPath(int number) {
+        for (RoadDirection direction : RoadDirection.values()) {
+            if (number == direction.number) {
+                return direction.path;
+            }
+        }
+        return null;
+    }
+    
+    public static boolean isCross(int number){
+        if(number > 4){
+            return true;
+        }
+        return false;
+    }
 
-    private PositionRoad positionRoad;
-
-
-    //private boolean basy = false;
-    private boolean entrance;// pega o flow e a posicao,
-    private boolean exite;// if o flow eh para roadRight and eh a ultima posicao da Road
-    // lastLine with flow
-
-    // as entradas
-    /*
-    qtdEntradasDireita;qtd de 2; Case1:1; case2:3; case3:2;
-    qtdEntradasEsquerda;
-    qtdEntradasCima;qtd de 2; Case1:1; case2:3; case3:2;
-    qtdEntradasBaixo;
-    qtdCross:
-    entraceRight; para ser uma entrada right precisa estah na columnposition 0 && DirectionFlow == 2;
-    entranceLeft; para ser uma entrada lefth precisa estah na columnposition ultima && DirectionFlow == 4;
-    entranceDown; para ser uma entrada down precisa estah na linePosition && DirectionFlow == 3;
-    entranceUp; para ser uma entrada up precisa estah na ultima linePosition && DirectionFlow == 1;
-     */
-
-
-
-
-    // as saidas
-
-
-
+    public int getNumber() {
+        return number;
+    }
+    
 }
