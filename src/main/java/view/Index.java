@@ -19,6 +19,7 @@ public class Index extends JFrame {
 
     JSpinner tfInsertionSpeed;
     JSpinner tfCar;
+    JComboBox<String> cbFile;
 
     public Index() {
         setTitle("Malha Viária");
@@ -28,28 +29,33 @@ public class Index extends JFrame {
         setLocationRelativeTo(null);
 
         buildPanels();
+
     }
 
     public void buildPanels() {
         layoutConstraint.gridx = 0;
         layoutConstraint.gridy = 0;
+        layoutConstraint.weighty = 0.1;
 
         //Criação do painel superior
         settingsPanel = new JPanelImage("/images/settings.png", 1300, 65);
         settingsPanel.setPreferredSize(new Dimension(settingsPanel.getWidth(), settingsPanel.getHeight()));
         settingsPanel.setOpaque(false);
-        
         initilizeMenuComponents();
-
-        //Posicionando os items do menu
         add(settingsPanel, layoutConstraint);
+
+        //Desenhando a malha
+        Table road = new Table();
+        layoutConstraint.weighty = 0.9;
+        layoutConstraint.gridy = 1;
+        add(road, layoutConstraint);
     }
 
     private void initilizeMenuComponents() {
 
         settingsPanel.setLayout(new GridBagLayout());
         GridBagConstraints mLayout = new GridBagConstraints();
-       
+
         btControll = new JButton("INICIAR");
         lblCar = new JLabel("Quantidade de carros: ");
         lblInsertionSpeed = new JLabel("Delay de inserção: ");
@@ -72,12 +78,11 @@ public class Index extends JFrame {
         for (int i = 1; i < 8; i++) {
             mLayout.gridx = i;
             mLayout.weightx = 0.1;
-            if(i % 2 != 0){
-            mLayout.weightx = 0.9;    
-            }           
+            if (i % 2 != 0) {
+                mLayout.weightx = 0.9;
+            }
             settingsPanel.add(menuComp.get(i), mLayout);
         }
     }
-
 
 }

@@ -10,6 +10,18 @@ import model.RoadMutex;
 
 public class MatrixUtils {
 
+    private static MatrixUtils instance;
+
+    private MatrixUtils() {
+    }
+
+    public static MatrixUtils getInstance() {
+        if (instance == null) {
+            instance = new MatrixUtils();
+        }
+        return instance;
+    }
+
     private Block[][] matriz;
     List<Block> entrances = new ArrayList<>();
     List<Block> exits = new ArrayList<>();
@@ -17,7 +29,8 @@ public class MatrixUtils {
     public void generateMapFromFile(String mPath) throws IOException {
         Path path = Paths.get(mPath);
         List<String> lines = Files.readAllLines(path);
-
+        System.out.println(lines.get(0));
+        System.out.println(lines.get(1));
         matriz = new Block[Integer.parseInt(lines.get(0))][Integer.parseInt(lines.get(1))];
         StringBuilder strRoad = new StringBuilder();
 
@@ -104,6 +117,14 @@ public class MatrixUtils {
 
     public int getCellDirection(int i, int j) {
         return matriz[i][j].getDirectionFlow();
+    }
+
+    public int getRowCount() {
+        return matriz.length;
+    }
+
+    public int getColCount() {
+        return matriz[0].length;
     }
 
     public Block[][] getMatrix() {
