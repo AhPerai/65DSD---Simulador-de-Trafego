@@ -1,12 +1,13 @@
 package view;
 
+import controller.Observer;
 import javax.swing.JLabel;
 
 /**
  *
  * @author Usuario
  */
-public class Cell extends JPanelImage{
+public class Cell extends JPanelImage implements Observer{
     
     private static int cellSize;
     private JLabel car;
@@ -18,6 +19,17 @@ public class Cell extends JPanelImage{
     
     public static int getCellSize(){
         return cellSize;
+    }
+
+    @Override
+    public void updateControllStatus(boolean status) {}
+
+    @Override
+    public void updateThreadCounter(int counter) {}
+
+    @Override
+    public void updateCarPosition() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
 }

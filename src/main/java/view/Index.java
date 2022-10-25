@@ -1,14 +1,18 @@
 package view;
 
+import controller.Controller;
+import controller.Observer;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import javax.swing.*;
 
-public class Index extends JFrame {
+public class Index extends JFrame implements Observer {
 
+    Controller controller;
     JPanelImage settingsPanel;
     GridBagLayout gbl = new GridBagLayout();
-    private GridBagConstraints layoutConstraint = new GridBagConstraints();
+    GridBagConstraints layoutConstraint = new GridBagConstraints();
 
     HashMap<Integer, JComponent> menuComp = new HashMap<Integer, JComponent>();
     JButton btControll;      //Controle para iniciar e finaliza a op
@@ -22,6 +26,7 @@ public class Index extends JFrame {
     JComboBox<String> cbFile;
 
     public Index() {
+        controller = Controller.getInstance();
         setTitle("Malha Viária");
         setSize(1400, 825);
         setLayout(gbl);
@@ -55,8 +60,8 @@ public class Index extends JFrame {
 
         settingsPanel.setLayout(new GridBagLayout());
         GridBagConstraints mLayout = new GridBagConstraints();
-
-        btControll = new JButton("INICIAR");
+        
+        btControll = new JButton();
         lblCar = new JLabel("Quantidade de carros: ");
         lblInsertionSpeed = new JLabel("Delay de inserção: ");
         lblCarCounter = new JLabel("Quantidade de carros passeando: ");
@@ -83,6 +88,39 @@ public class Index extends JFrame {
             }
             settingsPanel.add(menuComp.get(i), mLayout);
         }
+    }
+
+    //Controller Actions
+    private void start() {
+        controller.setQtdCar((int) tfCar.getValue());
+        controller.setAwait((int) tfInsertionSpeed.getValue());
+        controller.start();
+    }
+
+    private void stop() {
+        controller.finish();
+    }
+    
+    //Observer updates
+    @Override
+    public void updateControllStatus(boolean isStopped) {
+        if (isStopped) {
+            btControll.setText("INICIAR");
+            btControll.removeActionListener((ActionEvent e) -> stop());
+            btControll.addActionListener((ActionEvent e) -> start());
+        } else {
+            btControll.removeActionListener((ActionEvent e) -> stop());
+            btControll.addActionListener((ActionEvent e) -> start());
+        }
+    }
+
+    @Override
+    public void updateThreadCounter(int counter) {
+        lblCounter.setText("" + counter);
+    }
+
+    @Override
+    public void updateCarPosition() {
     }
 
 }
