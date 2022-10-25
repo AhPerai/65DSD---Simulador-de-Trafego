@@ -4,14 +4,13 @@ import java.util.ArrayList;
 
 public abstract class Block {
 
-    protected boolean cross;
+    protected boolean isExit = false;
     protected boolean entryCar;
     protected Block nextBlock;
     protected int directionFlow;
     protected Car car;
 
     protected int linePosition;
-
     protected int columnPosition;
 
     public Block(int directionFlow, int x, int y) {
@@ -38,8 +37,7 @@ public abstract class Block {
     }
 
     public void setCar(Car car) {
-        this.car = car; //necessário para informar que está com um carro no momento
-
+        this.car = car; 
     }
 
     public int getLinePosition() {
@@ -58,16 +56,19 @@ public abstract class Block {
         this.columnPosition = yPos;
     }
 
-    private boolean verifyCross() {
-        return RoadDirection.isCross(this.directionFlow);
+    public boolean isCross() {
+        if (this.directionFlow > 4) {
+            return true;
+        }
+        return false; 
     }
 
-    public boolean getCross() {
-        return cross;
+    public boolean isExit() {
+        return isExit;
     }
 
-    public void setCross(boolean cross) {
-        this.cross = cross;
+    public void setIsExit(boolean isExit) {
+        this.isExit = isExit;
     }
 
     public boolean getEntryCar() {
@@ -77,8 +78,8 @@ public abstract class Block {
     public void setEntryCar(boolean entryCar) {
         this.entryCar = entryCar;
     }
-    
-    public Block getNextBlock(){
+
+    public Block getNextBlock() {
         return this.nextBlock;
     }
 

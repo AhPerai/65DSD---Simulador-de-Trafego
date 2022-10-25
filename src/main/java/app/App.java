@@ -7,7 +7,7 @@ public class App {
     
     public static void main(String args[]){
          Index index = new Index();
-         index.setVisible(true);
+        
     }
     
 }

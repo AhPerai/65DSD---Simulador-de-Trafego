@@ -6,7 +6,7 @@ package controller;
  */
 public interface Observer {
 
-    public void updateCarPosition();
+    public void updateCarPosition(Integer [][]blockPositions);
 
     public void updateControllStatus(boolean status);
 

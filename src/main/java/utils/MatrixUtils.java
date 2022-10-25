@@ -3,6 +3,7 @@ package utils;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import model.Block;
 import model.RoadDirection;
@@ -22,16 +23,16 @@ public class MatrixUtils {
         return instance;
     }
 
-    private Block[][] matriz;
-    List<Block> entrances = new ArrayList<>();
-    List<Block> exits = new ArrayList<>();
+    private RoadMutex[][] matriz;
+    List<RoadMutex> entrances = new ArrayList<>();
+    List<RoadMutex> exits = new ArrayList<>();
 
     public void generateMapFromFile(String mPath) throws IOException {
         Path path = Paths.get(mPath);
         List<String> lines = Files.readAllLines(path);
         System.out.println(lines.get(0));
         System.out.println(lines.get(1));
-        matriz = new Block[Integer.parseInt(lines.get(0))][Integer.parseInt(lines.get(1))];
+        matriz = new RoadMutex[Integer.parseInt(lines.get(0))][Integer.parseInt(lines.get(1))];
         StringBuilder strRoad = new StringBuilder();
 
         //Criação da Matriz
@@ -62,9 +63,15 @@ public class MatrixUtils {
         for (int i = 0; i < matriz.length; i++) {
             for (int j = 0; j < matriz[i].length; j++) {
                 if (getCellDirection(i, j) > 0 && getCellDirection(i, j) < 5 && matriz[i][j].getNextBlock() == null) {
+                    matriz[i][j].setIsExit(true);
                     exits.add(matriz[i][j]);
                 }
             }
+        }
+
+        System.out.println("Saídas");
+        for (Block exit : exits) {
+            System.out.println(exit.getLinePosition() + " " + exit.getColumnPosition());
         }
     }
 
@@ -104,14 +111,21 @@ public class MatrixUtils {
                 }
             }
         }
+        
+        //embalhara as entradas
+        Collections.shuffle(getEntrances());
 
+        System.out.println("Entradas");
+        for (Block entrance : entrances) {
+            System.out.println(entrance.getLinePosition() + " " + entrance.getColumnPosition());
+        }
     }
 
-    public List<Block> getExits() {
+    public List<RoadMutex> getExits() {
         return this.exits;
     }
 
-    public List<Block> getEntrances() {
+    public List<RoadMutex> getEntrances() {
         return this.entrances;
     }
 

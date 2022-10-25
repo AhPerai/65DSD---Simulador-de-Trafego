@@ -4,25 +4,78 @@ import controller.Controller;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Car extends Thread {
 
     private int velocity;//random sleep;
-    private RoadDirection roadAtual;
-    private RoadDirection roadAnt;
     private Iterator<RoadDirection> route;
     private int idCar;
 
     private int nextDirectionFlow;
-    private int currentRow;
-    private int currentCol;
+    private RoadMutex currentBlock;
+    private Controller controller;
     private boolean out;
 
-    private Block currentBlockRoad;
-
     public Car(Controller controller) {
-        controller = Controller.getInstance();
+        this.controller = Controller.getInstance();
         seRandomVelocity();
+    }
+
+    public void run() {
+        while (!out) {
+            try {
+                Thread.currentThread().sleep(velocity);
+            } catch (InterruptedException e) {
+                e.getStackTrace();
+            }
+            if (currentBlock.getNextBlock().isExit()) {
+                //Executa lógica de ser saída
+            } else if (currentBlock.getNextBlock().isCross()) {
+                //Realiza lógica de cruzamento
+            } else {
+                //Movimentação normal
+            }
+
+        }
+    }
+
+    private void move() {
+        RoadMutex next = (RoadMutex) currentBlock.getNextBlock();
+        try {
+            next.getSemaphore().acquire();
+            next.setCar(this);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Car.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Integer[][] positions = {
+            {currentBlock.getLinePosition(), currentBlock.getColumnPosition()},
+            {next.getLinePosition(), next.getColumnPosition()}
+        };
+        controller.notifyMovement(positions);
+        currentBlock.getSemaphore().release();
+        currentBlock.setCar(null);
+        currentBlock = next;
+    }
+
+    private void moveCrossing() {
+
+    }
+
+    private void moveOut() {
+
+    }
+
+    public void enterRoad(RoadMutex entrance) {
+
+        try {
+            entrance.getSemaphore().acquire();
+            entrance.setCar(this);
+            this.setCurrentBlockRoad(entrance);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Car.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public int getNextDirectionFlow() {
@@ -35,11 +88,11 @@ public class Car extends Thread {
     }
 
     public Block getCurrentBlockRoad() {
-        return currentBlockRoad;
+        return currentBlock;
     }
 
-    public void setCurrentBlockRoad(Block currentRoad) {
-        this.currentBlockRoad = currentRoad;
+    public void setCurrentBlockRoad(RoadMutex currentRoad) {
+        this.currentBlock = currentRoad;
     }
 
     public int getIdCar() {
@@ -56,14 +109,7 @@ public class Car extends Thread {
 
     public void seRandomVelocity() {
         Random r = new Random();
-        this.velocity = (int) (1 + r.nextFloat() * (10 - 1)*100);
+        this.velocity = (int) (1 + r.nextFloat() * (10 - 1) * 100);
     }
 
-    //private String idCar;//getid - thread;
-    private String directionFlow;//
-
-    //private boolean runRoad(int linePosition,int columnPosition){
-    //    if()
-    //}
-    // Movement correto se -> seguir directionFlow e se a position a frente estiver vazia;
 }

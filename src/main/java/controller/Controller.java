@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Car;
 import model.RoadDirection;
+import model.RoadMutex;
 import utils.MatrixUtils;
 
 /**
@@ -18,7 +19,7 @@ public class Controller {
     private final MatrixUtils roadInstance = MatrixUtils.getInstance();
     private static Controller instance;
     private List<Observer> roadObservers = new ArrayList<>();
-    private String filename = "src/main/resources/casefiles/malha-exemplo-3.txt";
+    private String filename = "src/main/resources/casefiles/malha-exemplo-1.txt";
 
     //Singleton
     private Controller() {
@@ -29,6 +30,32 @@ public class Controller {
             e.printStackTrace();
         }
 
+    }
+
+    public void addObserver(Observer obs) {
+        this.roadObservers.add(obs);
+    }
+
+    public void removeObserver(Observer obs) {
+        this.roadObservers.remove(obs);
+    }
+
+    public void notifyMovement(Integer[][] blockPositions) {
+        for (Observer observer : roadObservers) {
+            observer.updateCarPosition(blockPositions);
+        }
+    }
+
+    public void notifyControllButton() {
+        for (Observer observer : roadObservers) {
+            observer.updateControllStatus(isStopped());
+        }
+    }
+
+    public void notifyThreadCounter() {
+        for (Observer observer : roadObservers) {
+            observer.updateThreadCounter(carList.size());
+        }
     }
 
     public static Controller getInstance() {
@@ -73,16 +100,33 @@ public class Controller {
     }
 
     public void start() {
-        for (int i = 0; i < qtdCar; i++) {
-            if (stopped) {
-                break;
+        int i = 0;
+        this.stopped = false;
+        notifyControllButton();
+        while (true) {
+            if (carList.size() < qtdCar) {
+                Car newCar = new Car(this);
+                RoadMutex entrance = roadInstance.getEntrances().get(i);
+                Integer[][] positions = {{null, null}, {entrance.getLinePosition(), entrance.getColumnPosition()}};
+
+                newCar.enterRoad(entrance);
+                carList.add(newCar);
+                notifyThreadCounter();
+                notifyMovement(positions);
+                newCar.start();
+
+                i++;
+                if (i == roadInstance.getEntrances().size()) {
+                    i = 0;
+                }
+
+                try {
+                    Thread.currentThread().sleep(this.await);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
-            Car newCar = new Car(this);
-            try {
-                Thread.currentThread().sleep(this.await);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
-            }
+
         }
     }
 

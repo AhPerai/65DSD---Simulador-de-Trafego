@@ -27,6 +27,7 @@ public class Index extends JFrame implements Observer {
 
     public Index() {
         controller = Controller.getInstance();
+        controller.addObserver(this);
         setTitle("Malha Viária");
         setSize(1400, 825);
         setLayout(gbl);
@@ -34,7 +35,8 @@ public class Index extends JFrame implements Observer {
         setLocationRelativeTo(null);
 
         buildPanels();
-
+        setVisible(true);
+        controller.notifyControllButton();
     }
 
     public void buildPanels() {
@@ -61,13 +63,13 @@ public class Index extends JFrame implements Observer {
         settingsPanel.setLayout(new GridBagLayout());
         GridBagConstraints mLayout = new GridBagConstraints();
         
-        btControll = new JButton();
+        btControll = new JButton("dsaassadas");
         lblCar = new JLabel("Quantidade de carros: ");
         lblInsertionSpeed = new JLabel("Delay de inserção: ");
         lblCarCounter = new JLabel("Quantidade de carros passeando: ");
-        lblCounter = new JLabel("");
+        lblCounter = new JLabel("0");
         tfCar = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
-        tfInsertionSpeed = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
+        tfInsertionSpeed = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
 
         menuComp.put(1, btControll);
         menuComp.put(2, lblCar);
@@ -109,18 +111,18 @@ public class Index extends JFrame implements Observer {
             btControll.removeActionListener((ActionEvent e) -> stop());
             btControll.addActionListener((ActionEvent e) -> start());
         } else {
-            btControll.removeActionListener((ActionEvent e) -> stop());
-            btControll.addActionListener((ActionEvent e) -> start());
+            btControll.setText("PARAR");
+            btControll.removeActionListener((ActionEvent e) -> start());
+            btControll.addActionListener((ActionEvent e) -> stop());
         }
     }
 
     @Override
     public void updateThreadCounter(int counter) {
-        lblCounter.setText("" + counter);
+        lblCounter.setText(counter+"");
     }
 
     @Override
-    public void updateCarPosition() {
-    }
+    public void updateCarPosition(Integer[][] blockPositions) {}
 
 }

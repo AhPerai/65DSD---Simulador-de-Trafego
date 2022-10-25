@@ -41,13 +41,6 @@ public enum RoadDirection {
         return (String) directionsMap.get(number);
     }
 
-    public static boolean isCross(int number) {
-        if (number > 4) {
-            return true;
-        }
-        return false;
-    }
-
     public int getNumber() {
         return number;
     }
