@@ -3,11 +3,10 @@ package model;
 import controller.Controller;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -171,9 +170,7 @@ public class Car extends Thread {
         RoadMutex chosen = outOptions.get(new Random().nextInt(outOptions.size()));
         List<RoadMutex> path = new ArrayList<>();
         boolean acquiredPath = chosen.getSemaphore().tryAcquire();
-        System.out.println("Estou em: " + currentBlock.getDirectionFlow()
-                + "\nQuero ir para: " + chosen.getDirectionFlow()
-                + "\ne deu " + acquiredPath);
+
         if (acquiredPath) {
             chosen.setCar(this);
             if (currentBlock.getDirectionFlow() - chosen.getDirectionFlow() == 0) {
@@ -188,9 +185,8 @@ public class Car extends Thread {
             }
             if (currentBlock.getDirectionFlow() - chosen.getDirectionFlow() == -1
                     || currentBlock.getDirectionFlow() - chosen.getDirectionFlow() == 3) {
-                for (int k = 0; k < 1; k++) {
-                    path.add(crossOptions.get(k));
-                }
+                path.add(crossOptions.get(0));
+
             }
             if (currentBlock.getDirectionFlow() - chosen.getDirectionFlow() == 1
                     || currentBlock.getDirectionFlow() - chosen.getDirectionFlow() == -3) {
@@ -200,8 +196,19 @@ public class Car extends Thread {
             }
 
             for (RoadMutex roadMutex : path) {
+                List<Semaphore> acquired = new ArrayList<>();
+                acquired.add(roadMutex.getSemaphore());
                 boolean b = roadMutex.getSemaphore().tryAcquire();
                 if (!b) {
+                    chosen.getSemaphore().release();
+                    for (Semaphore semaphore : acquired) {
+                        semaphore.release();
+                    }
+                    try {
+                        Thread.currentThread().sleep(velocity);
+                    } catch (InterruptedException e) {
+                        e.getStackTrace();
+                    }
                     return null;
                 }
                 roadMutex.setCar(this);
@@ -209,6 +216,12 @@ public class Car extends Thread {
 
             path.add(chosen);
             return path;
+        } else {
+            try {
+                Thread.currentThread().sleep(velocity);
+            } catch (InterruptedException e) {
+                e.getStackTrace();
+            }
         }
         return null;
     }
@@ -238,7 +251,7 @@ public class Car extends Thread {
 
     public void seRandomVelocity() {
         Random r = new Random();
-        this.velocity = 1000/*(int) (1 + r.nextFloat() * (10 - 1) * 100) + 375*/;
+        this.velocity = (int) (1 + r.nextFloat() * (10 - 1) * 100) + 375;
     }
 
 }

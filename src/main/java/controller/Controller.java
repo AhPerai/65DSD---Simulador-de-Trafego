@@ -19,7 +19,7 @@ public class Controller extends Thread {
     private final MatrixUtils roadInstance = MatrixUtils.getInstance();
     private static Controller instance;
     private List<Observer> roadObservers = new ArrayList<>();
-    private String filename = "src/main/resources/casefiles/malha-exemplo-1.txt";
+    private String filename = "src/main/resources/casefiles/malha-exemplo-3.txt";
 
     //Singleton
     private Controller() {
