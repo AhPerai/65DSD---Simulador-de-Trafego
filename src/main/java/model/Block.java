@@ -1,7 +1,5 @@
 package model;
 
-import java.util.ArrayList;
-
 public abstract class Block {
 
     protected boolean isExit = false;
@@ -19,10 +17,6 @@ public abstract class Block {
         this.columnPosition = y;
         this.nextBlock = null;
     }
-
-    public abstract void addCar(Car car);
-
-    public abstract void killCar();
 
     public int getDirectionFlow() {
         return directionFlow;
@@ -105,9 +99,6 @@ public abstract class Block {
                 if (this.columnPosition - 1 >= 0) {
                     this.nextBlock = road[this.linePosition][this.columnPosition - 1];
                 }
-
         }
-
     }
-
 }

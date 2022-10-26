@@ -14,7 +14,7 @@ import utils.MatrixUtils;
  *
  * @author Usuario
  */
-public class Controller {
+public class Controller extends Thread {
 
     private final MatrixUtils roadInstance = MatrixUtils.getInstance();
     private static Controller instance;
@@ -75,6 +75,10 @@ public class Controller {
     private int await;
     private boolean stopped = true;
 
+    public List<Car> getCarList() {
+        return carList;
+    }
+
     public void setQtdCar(int qtdCar) {
         this.qtdCar = qtdCar;
     }
@@ -96,42 +100,47 @@ public class Controller {
     }
 
     public void await() throws InterruptedException {
-        Thread.currentThread().sleep(await);
+        sleep(await);
     }
 
-    public void start() {
+    @Override
+    public void run() {
         int i = 0;
         this.stopped = false;
         notifyControllButton();
-        while (true) {
+        while (!stopped) {
             if (carList.size() < qtdCar) {
                 Car newCar = new Car(this);
                 RoadMutex entrance = roadInstance.getEntrances().get(i);
                 Integer[][] positions = {{null, null}, {entrance.getLinePosition(), entrance.getColumnPosition()}};
 
-                newCar.enterRoad(entrance);
-                carList.add(newCar);
-                notifyThreadCounter();
-                notifyMovement(positions);
-                newCar.start();
+                if (newCar.enterRoad(entrance)) {
+                    carList.add(newCar);
+                    notifyThreadCounter();
+                    notifyMovement(positions);
+                    newCar.start();
+                } else {
+                    System.out.println("Não deu, vamos para a entrada " + (i + 1));
+                }
 
                 i++;
+
                 if (i == roadInstance.getEntrances().size()) {
                     i = 0;
                 }
-
                 try {
-                    Thread.currentThread().sleep(this.await);
+                    await();
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-
         }
     }
 
     public void finish() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        this.stopped = true;
+        notifyControllButton();
+        this.interrupt();
     }
 
 }

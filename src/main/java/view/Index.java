@@ -15,7 +15,8 @@ public class Index extends JFrame implements Observer {
     GridBagConstraints layoutConstraint = new GridBagConstraints();
 
     HashMap<Integer, JComponent> menuComp = new HashMap<Integer, JComponent>();
-    JButton btControll;      //Controle para iniciar e finaliza a op
+    JButton btStart;      //Controle para iniciar e finaliza a op
+    JButton btStop;      //Controle para iniciar e finaliza a op
     JLabel lblCar;           //Label de indicação: quantidade de carros
     JLabel lblInsertionSpeed;//Label de indicação: delay para inserção de novas threads  
     JLabel lblCarCounter;    //Label de indicação: contador de threads
@@ -62,8 +63,9 @@ public class Index extends JFrame implements Observer {
 
         settingsPanel.setLayout(new GridBagLayout());
         GridBagConstraints mLayout = new GridBagConstraints();
-        
-        btControll = new JButton("dsaassadas");
+
+        btStart = new JButton("Iniciar");
+        btStop = new JButton("Parar");
         lblCar = new JLabel("Quantidade de carros: ");
         lblInsertionSpeed = new JLabel("Delay de inserção: ");
         lblCarCounter = new JLabel("Quantidade de carros passeando: ");
@@ -71,7 +73,8 @@ public class Index extends JFrame implements Observer {
         tfCar = new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
         tfInsertionSpeed = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
 
-        menuComp.put(1, btControll);
+        menuComp.put(0, btStart);
+        menuComp.put(1, btStop);
         menuComp.put(2, lblCar);
         menuComp.put(3, tfCar);
         menuComp.put(4, lblInsertionSpeed);
@@ -82,47 +85,42 @@ public class Index extends JFrame implements Observer {
         mLayout.gridx = 0;
         mLayout.gridy = 0;
 
-        for (int i = 1; i < 8; i++) {
+        for (int i = 0; i < menuComp.size(); i++) {
             mLayout.gridx = i;
-            mLayout.weightx = 0.1;
-            if (i % 2 != 0) {
-                mLayout.weightx = 0.9;
-            }
+            mLayout.weightx = 1.0;
             settingsPanel.add(menuComp.get(i), mLayout);
         }
+        
+        addActions();
     }
 
     //Controller Actions
-    private void start() {
-        controller.setQtdCar((int) tfCar.getValue());
-        controller.setAwait((int) tfInsertionSpeed.getValue());
-        controller.start();
+    private void addActions() {
+        btStart.addActionListener((ActionEvent e) -> {
+            controller.setQtdCar((int) tfCar.getValue());
+            controller.setAwait((int) tfInsertionSpeed.getValue());
+            controller.start();
+        });
+
+        btStop.addActionListener((ActionEvent e) -> {
+            controller.finish();
+        });
     }
 
-    private void stop() {
-        controller.finish();
-    }
-    
     //Observer updates
     @Override
     public void updateControllStatus(boolean isStopped) {
-        if (isStopped) {
-            btControll.setText("INICIAR");
-            btControll.removeActionListener((ActionEvent e) -> stop());
-            btControll.addActionListener((ActionEvent e) -> start());
-        } else {
-            btControll.setText("PARAR");
-            btControll.removeActionListener((ActionEvent e) -> start());
-            btControll.addActionListener((ActionEvent e) -> stop());
-        }
+            btStart.setEnabled(isStopped);
+            btStop.setEnabled(!isStopped);
     }
 
     @Override
     public void updateThreadCounter(int counter) {
-        lblCounter.setText(counter+"");
+        lblCounter.setText(counter + "");
     }
 
     @Override
-    public void updateCarPosition(Integer[][] blockPositions) {}
+    public void updateCarPosition(Integer[][] blockPositions) {
+    }
 
 }

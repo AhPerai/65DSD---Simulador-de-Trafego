@@ -26,8 +26,7 @@ class JPanelImage extends JPanel {
     public JPanelImage(String path, int width, int height) {
         this.width = width;
         this.height = height;
-        setLayout(null);
-        setOpaque(true);
+        setOpaque(false);
         background = new ImageIcon(getClass().getResource(path)).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
     }
 

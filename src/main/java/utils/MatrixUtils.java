@@ -111,7 +111,7 @@ public class MatrixUtils {
                 }
             }
         }
-        
+
         //embalhara as entradas
         Collections.shuffle(getEntrances());
 
@@ -141,7 +141,14 @@ public class MatrixUtils {
         return matriz[0].length;
     }
 
-    public Block[][] getMatrix() {
+    public RoadMutex[][] getMatrix() {
         return matriz;
+    }
+
+    public RoadMutex getBlock(int i, int j) {
+        if (i <= getRowCount() && j <= getColCount()) {
+            return matriz[i][j];
+        }
+        return null;
     }
 }

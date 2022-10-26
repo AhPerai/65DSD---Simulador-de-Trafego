@@ -9,7 +9,7 @@ import model.RoadDirection;
 
 public class Table extends JPanel implements Observer {
 
-    private final int size = 600;
+    private final int size = 575;
     private int cellSize;
     private int rows;
     private int cols;
@@ -22,7 +22,7 @@ public class Table extends JPanel implements Observer {
         rows = c.getMatrixRoad().getRowCount();
         cols = c.getMatrixRoad().getColCount();
         road = new Cell[rows][cols];
-        cellSize = 600 / rows;
+        cellSize = size / rows;
         setPreferredSize(new Dimension(cellSize * (int) Math.round(cols * 1.2), cellSize * (int) Math.round(rows * 1.2)));
         setLayout(new GridLayout(rows, cols));
         setOpaque(false);
