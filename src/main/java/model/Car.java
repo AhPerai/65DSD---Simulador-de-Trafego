@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,7 +37,6 @@ public class Car extends Thread {
             } else {
                 move();
             }
-
         }
     }
 
@@ -59,7 +59,12 @@ public class Car extends Thread {
     }
 
     private void moveCrossing() {
-        List<RoadMutex> acquiredPath = mapCrossOuts();
+        List<RoadMutex> acquiredPath = null;
+        try {
+            acquiredPath = mapCrossOuts();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Car.class.getName()).log(Level.SEVERE, null, ex);
+        }
         if (acquiredPath != null) {
 
             for (int i = 0; i < acquiredPath.size(); i++) {
@@ -98,10 +103,16 @@ public class Car extends Thread {
 
         controller.getCarList().remove(this);
         controller.notifyThreadCounter();
-        this.interrupt();
+        try {
+            this.join();
+            this.interrupt();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Car.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
-    private List<RoadMutex> mapCrossOuts() {
+    private List<RoadMutex> mapCrossOuts() throws InterruptedException {
         Map<Integer, RoadMutex> crossOptions = new HashMap<>();
         int i = currentBlock.getLinePosition();
         int j = currentBlock.getColumnPosition();
@@ -169,7 +180,7 @@ public class Car extends Thread {
         //Criando caminho
         RoadMutex chosen = outOptions.get(new Random().nextInt(outOptions.size()));
         List<RoadMutex> path = new ArrayList<>();
-        boolean acquiredPath = chosen.getSemaphore().tryAcquire();
+        boolean acquiredPath = chosen.getSemaphore().tryAcquire(100, TimeUnit.MILLISECONDS);
 
         if (acquiredPath) {
             chosen.setCar(this);
@@ -198,17 +209,13 @@ public class Car extends Thread {
             for (RoadMutex roadMutex : path) {
                 List<Semaphore> acquired = new ArrayList<>();
                 acquired.add(roadMutex.getSemaphore());
-                boolean b = roadMutex.getSemaphore().tryAcquire();
+                boolean b = roadMutex.getSemaphore().tryAcquire(100, TimeUnit.MILLISECONDS);
                 if (!b) {
                     chosen.getSemaphore().release();
                     for (Semaphore semaphore : acquired) {
                         semaphore.release();
                     }
-                    try {
-                        Thread.currentThread().sleep(velocity);
-                    } catch (InterruptedException e) {
-                        e.getStackTrace();
-                    }
+                    Thread.currentThread().sleep(velocity);
                     return null;
                 }
                 roadMutex.setCar(this);
@@ -216,20 +223,14 @@ public class Car extends Thread {
 
             path.add(chosen);
             return path;
-        } else {
-            try {
-                Thread.currentThread().sleep(velocity);
-            } catch (InterruptedException e) {
-                e.getStackTrace();
-            }
         }
+        Thread.currentThread().sleep(velocity);
         return null;
     }
 
     public boolean enterRoad(RoadMutex entrance) {
         boolean acquired = entrance.getSemaphore().tryAcquire();
         if (acquired) {
-            System.out.println(acquired);
             entrance.setCar(this);
             this.setCurrentBlockRoad(entrance);
         }

@@ -5,6 +5,8 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.Block;
 import model.RoadDirection;
 import model.RoadMutex;
@@ -27,11 +29,14 @@ public class MatrixUtils {
     List<RoadMutex> entrances = new ArrayList<>();
     List<RoadMutex> exits = new ArrayList<>();
 
-    public void generateMapFromFile(String mPath) throws IOException {
+    public void generateMapFromFile(String mPath){
         Path path = Paths.get(mPath);
-        List<String> lines = Files.readAllLines(path);
-        System.out.println(lines.get(0));
-        System.out.println(lines.get(1));
+        List<String> lines = new ArrayList<>();
+        try {
+            lines = Files.readAllLines(path);
+        } catch (IOException ex) {
+            Logger.getLogger(MatrixUtils.class.getName()).log(Level.SEVERE, null, ex);
+        }
         matriz = new RoadMutex[Integer.parseInt(lines.get(0))][Integer.parseInt(lines.get(1))];
         StringBuilder strRoad = new StringBuilder();
 
@@ -60,6 +65,7 @@ public class MatrixUtils {
     }
 
     public void loadExits() {
+        exits.clear();
         for (int i = 0; i < matriz.length; i++) {
             for (int j = 0; j < matriz[i].length; j++) {
                 if (getCellDirection(i, j) > 0 && getCellDirection(i, j) < 5 && matriz[i][j].getNextBlock() == null) {
@@ -76,6 +82,7 @@ public class MatrixUtils {
     }
 
     public void loadEntrances() {
+        entrances.clear();
         //Ruas que sobem e se encontram na linha ultima linha
         for (int i = matriz.length - 1; i < matriz.length; i++) {
             for (int j = 0; j < matriz[i].length; j++) {

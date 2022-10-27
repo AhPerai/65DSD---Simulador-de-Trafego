@@ -1,8 +1,8 @@
 package controller;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Car;
@@ -19,17 +19,22 @@ public class Controller extends Thread {
     private final MatrixUtils roadInstance = MatrixUtils.getInstance();
     private static Controller instance;
     private List<Observer> roadObservers = new ArrayList<>();
-    private String filename = "src/main/resources/casefiles/malha-exemplo-3.txt";
+    private Map<String, String> filePaths = new HashMap<String, String>();
+    private String filename = "src/main/resources/casefiles/malha-exemplo-1.txt";
 
-    //Singleton
     private Controller() {
-        try {
-            RoadDirection.toMap();
-            this.roadInstance.generateMapFromFile(filename);
-        } catch (IOException e) {
-            e.printStackTrace();
+        RoadDirection.toMap();
+        this.roadInstance.generateMapFromFile(filename);
+        initMapFiles();
+        this.start();
+    }
+
+    public static Controller getInstance() {
+        if (instance == null) {
+            instance = new Controller();
         }
 
+        return instance;
     }
 
     public void addObserver(Observer obs) {
@@ -58,16 +63,32 @@ public class Controller extends Thread {
         }
     }
 
-    public static Controller getInstance() {
-        if (instance == null) {
-            instance = new Controller();
+    public void notifyInitFiles() {
+        Set<String> keys = filePaths.keySet();
+        for (Observer observer : roadObservers) {
+            observer.initRoadFiles(keys.toArray(new String[keys.size()]));
         }
+    }
 
-        return instance;
+    private void initMapFiles() {
+        File folder = new File("src/main/resources/casefiles");
+        File[] listOfFiles = folder.listFiles();
+        String[] filenames = new String[listOfFiles.length];
+
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile()) {
+                filenames[i] = "Malha " + i;
+                filePaths.put(filenames[i], listOfFiles[i].getPath());
+            }
+        }
     }
 
     public MatrixUtils getMatrixRoad() {
         return roadInstance;
+    }
+
+    public Map<String, String> getFilePaths() {
+        return filePaths;
     }
 
     private List<Car> carList = new ArrayList<>();
@@ -84,11 +105,11 @@ public class Controller extends Thread {
     }
 
     public void setAwait(int await) {
-        this.await = await * 1000;
+        this.await = await * 100;
     }
 
-    public void getAwait(int await) {
-        this.await = await;
+    public int getAwait() {
+        return this.await;
     }
 
     public boolean isStopped() {
@@ -99,15 +120,38 @@ public class Controller extends Thread {
         this.stopped = stopped;
     }
 
-    public void await() throws InterruptedException {
-        sleep(await);
+    public void await() {
+        try {
+            sleep(await);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
     public void run() {
-        int i = 0;
+        do {
+            if (!stopped) {
+                roadStart();
+            } else {
+                await();
+            }
+
+        } while (true);
+    }
+
+    public void initialize() {
         this.stopped = false;
         notifyControllButton();
+    }
+
+    public void finish() {
+        this.stopped = true;
+        notifyControllButton();
+    }
+
+    private void roadStart() {
+        int i = 0;
         while (!stopped) {
             if (carList.size() < qtdCar) {
                 Car newCar = new Car(this);
@@ -128,19 +172,12 @@ public class Controller extends Thread {
                 if (i == roadInstance.getEntrances().size()) {
                     i = 0;
                 }
-                try {
-                    await();
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                await();
+            }
+            if (carList.size() == qtdCar) {
+                await();
             }
         }
-    }
-
-    public void finish() {
-        this.stopped = true;
-        notifyControllButton();
-        this.interrupt();
     }
 
 }

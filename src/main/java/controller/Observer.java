@@ -11,5 +11,7 @@ public interface Observer {
     public void updateControllStatus(boolean status);
 
     public void updateThreadCounter(int counter);
+    
+    public void initRoadFiles(String[] roadFiles);
 
 }

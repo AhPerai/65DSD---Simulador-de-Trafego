@@ -19,17 +19,18 @@ public class Table extends JPanel implements Observer {
     public Table() {
         this.c = Controller.getInstance();
         c.addObserver(this);
-        rows = c.getMatrixRoad().getRowCount();
-        cols = c.getMatrixRoad().getColCount();
-        road = new Cell[rows][cols];
-        cellSize = size / rows;
-        setPreferredSize(new Dimension(cellSize * (int) Math.round(cols * 1.2), cellSize * (int) Math.round(rows * 1.2)));
-        setLayout(new GridLayout(rows, cols));
         setOpaque(false);
         draw();
     }
 
     public void draw() {
+        rows = c.getMatrixRoad().getRowCount();
+        cols = c.getMatrixRoad().getColCount();
+        road = new Cell[rows][cols];
+        setLayout(new GridLayout(rows, cols));
+        cellSize = size / rows;
+        setPreferredSize(new Dimension(cellSize * (int) Math.round(cols * 1.2), cellSize * (int) Math.round(rows * 1.2)));
+
         this.removeAll();
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -51,11 +52,11 @@ public class Table extends JPanel implements Observer {
     public void updateCarPosition(Integer[][] blockPositions) {
         Integer oldCell[] = blockPositions[0];
         Integer newCell[] = blockPositions[1];
-        
+
         if (oldCell[0] != null && oldCell[1] != null) {
             road[oldCell[0]][oldCell[1]].reset();
         }
-        
+
         if (newCell[0] != null && newCell[1] != null) {
             road[newCell[0]][newCell[1]].addCarLabel();
         }
@@ -67,6 +68,10 @@ public class Table extends JPanel implements Observer {
 
     @Override
     public void updateThreadCounter(int counter) {
+    }
+
+    @Override
+    public void initRoadFiles(String[] roadFiles) {
     }
 
 }
