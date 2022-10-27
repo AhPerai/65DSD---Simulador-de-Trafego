@@ -23,6 +23,14 @@ public class Car extends Thread {
         seRandomVelocity();
     }
 
+    public boolean isOut() {
+        return out;
+    }
+
+    public void setOut(boolean out) {
+        this.out = out;
+    }
+
     public void run() {
         while (!out) {
             try {
@@ -38,6 +46,7 @@ public class Car extends Thread {
                 move();
             }
         }
+        System.out.println("Parou");
     }
 
     private void move() {
@@ -103,13 +112,6 @@ public class Car extends Thread {
 
         controller.getCarList().remove(this);
         controller.notifyThreadCounter();
-        try {
-            this.join();
-            this.interrupt();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Car.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
     }
 
     private List<RoadMutex> mapCrossOuts() throws InterruptedException {

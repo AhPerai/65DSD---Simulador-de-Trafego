@@ -2,6 +2,7 @@ package view;
 
 import controller.Controller;
 import controller.Observer;
+import controller.state.Finished;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -16,8 +17,7 @@ public class Index extends JFrame implements Observer {
     GridBagConstraints layoutConstraint = new GridBagConstraints();
 
     ArrayList<JComponent> menuComp = new ArrayList<>();
-    JButton btStart;      //Controle para iniciar e finaliza a op
-    JButton btStop;      //Controle para iniciar e finaliza a op
+    JButton btControll;      //Controle para iniciar e finaliza a op
     JLabel lblCar;           //Label de indicação: quantidade de carros
     JLabel lblInsertionSpeed;//Label de indicação: delay para inserção de novas threads  
     JLabel lblCarCounter;    //Label de indicação: contador de threads
@@ -26,6 +26,8 @@ public class Index extends JFrame implements Observer {
     JComboBox<String> cbRoadFiles;
     JSpinner tfInsertionSpeed;
     JSpinner tfCar;
+    
+    
 
     public Index() {
         controller = Controller.getInstance();
@@ -67,8 +69,7 @@ public class Index extends JFrame implements Observer {
         settingsPanel.setLayout(new GridBagLayout());
         GridBagConstraints mLayout = new GridBagConstraints();
 
-        btStart = new JButton("Iniciar");
-        btStop = new JButton("Parar");
+        btControll = new JButton("Iniciar");
         cbRoadFiles = new JComboBox();
         lblCar = new JLabel("Quantidade de carros: ");
         lblInsertionSpeed = new JLabel("Delay de inserção: ");
@@ -77,8 +78,7 @@ public class Index extends JFrame implements Observer {
         tfCar = new JSpinner(new SpinnerNumberModel(1, 1, 200, 1));
         tfInsertionSpeed = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
 
-        menuComp.add(btStart);
-        menuComp.add(btStop);
+        menuComp.add(btControll);
         menuComp.add(cbRoadFiles);
         menuComp.add(lblCar);
         menuComp.add(tfCar);
@@ -101,18 +101,17 @@ public class Index extends JFrame implements Observer {
 
     //Controller Actions
     private void addActions() {
-        btStart.addActionListener((ActionEvent e) -> {
-            controller.setQtdCar((int) tfCar.getValue());
-            controller.setAwait((int) tfInsertionSpeed.getValue());
-            controller.initialize();
-        });
-
-        btStop.addActionListener((ActionEvent e) -> {
-            controller.finish();
+        btControll.addActionListener((ActionEvent e) -> {
+            if (controller.isStopped()) {
+                controller.setQtdCar((int) tfCar.getValue());
+                controller.setAwait((int) tfInsertionSpeed.getValue());
+            }
+            controller.getControllerState().nextState();
         });
 
         cbRoadFiles.addActionListener((ActionEvent e) -> {
-            controller.getMatrixRoad().generateMapFromFile(controller.getFilePaths().get((String) cbRoadFiles.getSelectedItem()));
+            controller.setFilename(controller.getFilePaths().get((String) cbRoadFiles.getSelectedItem()));
+            controller.getMatrixRoad().generateMapFromFile(controller.getFilename());
             road.draw();
         });
     }
@@ -120,8 +119,8 @@ public class Index extends JFrame implements Observer {
     //Observer updates
     @Override
     public void updateControllStatus(boolean isStopped) {
-        btStart.setEnabled(isStopped);
-        btStop.setEnabled(!isStopped);
+        cbRoadFiles.setEnabled(isStopped);
+        btControll.setText(controller.getControllerState().getNextAction());
     }
 
     @Override
@@ -138,6 +137,10 @@ public class Index extends JFrame implements Observer {
         for (String file : roadFiles) {
             cbRoadFiles.addItem(file);
         }
+    }
+
+    @Override
+    public void reset() {
     }
 
 }

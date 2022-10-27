@@ -63,6 +63,11 @@ public class Table extends JPanel implements Observer {
     }
 
     @Override
+    public void reset() {
+        draw();
+    }
+
+    @Override
     public void updateControllStatus(boolean status) {
     }
 

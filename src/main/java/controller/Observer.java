@@ -13,5 +13,7 @@ public interface Observer {
     public void updateThreadCounter(int counter);
     
     public void initRoadFiles(String[] roadFiles);
+    
+    public void reset();
 
 }

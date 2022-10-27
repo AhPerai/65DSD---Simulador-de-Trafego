@@ -1,13 +1,14 @@
 package controller;
 
+import controller.state.Finished;
+import controller.state.SimulationState;
 import java.io.File;
-import java.io.IOException;
+import static java.lang.Thread.sleep;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Car;
 import model.RoadDirection;
-import model.RoadMutex;
 import utils.MatrixUtils;
 
 /**
@@ -18,14 +19,16 @@ public class Controller extends Thread {
 
     private final MatrixUtils roadInstance = MatrixUtils.getInstance();
     private static Controller instance;
+    private SimulationState state;
     private List<Observer> roadObservers = new ArrayList<>();
     private Map<String, String> filePaths = new HashMap<String, String>();
     private String filename = "src/main/resources/casefiles/malha-exemplo-1.txt";
 
     private Controller() {
         RoadDirection.toMap();
-        this.roadInstance.generateMapFromFile(filename);
+        roadInstance.generateMapFromFile(filename);
         initMapFiles();
+        state = new Finished(this);
         this.start();
     }
 
@@ -70,6 +73,12 @@ public class Controller extends Thread {
         }
     }
 
+    public void notifyReset() {
+        for (Observer observer : roadObservers) {
+            observer.reset();
+        }
+    }
+
     private void initMapFiles() {
         File folder = new File("src/main/resources/casefiles");
         File[] listOfFiles = folder.listFiles();
@@ -91,6 +100,22 @@ public class Controller extends Thread {
         return filePaths;
     }
 
+    public SimulationState getControllerState() {
+        return state;
+    }
+
+    public void setState(SimulationState state) {
+        this.state = state;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
     private List<Car> carList = new ArrayList<>();
     private int qtdCar;
     private int await;
@@ -102,6 +127,10 @@ public class Controller extends Thread {
 
     public void setQtdCar(int qtdCar) {
         this.qtdCar = qtdCar;
+    }
+
+    public int getQtdCar() {
+        return qtdCar;
     }
 
     public void setAwait(int await) {
@@ -130,54 +159,8 @@ public class Controller extends Thread {
 
     @Override
     public void run() {
-        do {
-            if (!stopped) {
-                roadStart();
-            } else {
-                await();
-            }
-
-        } while (true);
-    }
-
-    public void initialize() {
-        this.stopped = false;
-        notifyControllButton();
-    }
-
-    public void finish() {
-        this.stopped = true;
-        notifyControllButton();
-    }
-
-    private void roadStart() {
-        int i = 0;
-        while (!stopped) {
-            if (carList.size() < qtdCar) {
-                Car newCar = new Car(this);
-                RoadMutex entrance = roadInstance.getEntrances().get(i);
-                Integer[][] positions = {{null, null}, {entrance.getLinePosition(), entrance.getColumnPosition()}};
-
-                if (newCar.enterRoad(entrance)) {
-                    carList.add(newCar);
-                    notifyThreadCounter();
-                    notifyMovement(positions);
-                    newCar.start();
-                } else {
-                    System.out.println("Não deu, vamos para a entrada " + (i + 1));
-                }
-
-                i++;
-
-                if (i == roadInstance.getEntrances().size()) {
-                    i = 0;
-                }
-                await();
-            }
-            if (carList.size() == qtdCar) {
-                await();
-            }
+        while (true) {
+            state.execute();
         }
     }
-
 }
