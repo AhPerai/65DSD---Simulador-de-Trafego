@@ -60,8 +60,6 @@ public class MatrixUtils {
 
         loadEntrances();
         loadExits();
-
-        System.out.println(strRoad);
     }
 
     public void loadExits() {

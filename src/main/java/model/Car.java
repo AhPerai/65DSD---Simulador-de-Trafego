@@ -46,6 +46,7 @@ public class Car extends Thread {
                 move();
             }
         }
+        moveOut();
         System.out.println("Parou");
     }
 
@@ -236,7 +237,6 @@ public class Car extends Thread {
             entrance.setCar(this);
             this.setCurrentBlockRoad(entrance);
         }
-        System.out.println(acquired);
         return acquired;
     }
 
